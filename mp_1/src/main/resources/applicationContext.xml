@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!--    引入配置文件-->
+    <context:property-placeholder location="classpath:db.properties"/>
+
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <property name="username" value="${jdbc.username}"></property>
+        <property name="password" value="${jdbc.password}"></property>
+        <property name="url" value="${jdbc.url}" />
+        <property name="driverClassName" value="${jdbc.driver}"></property>
+    </bean>
+
+    <bean id="dataSourceTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <tx:annotation-driven transaction-manager="dataSourceTransactionManager"/>
+
+    <bean id="sqlSessionFactoryBean" class="com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <!--        <property name="configLocation" value="classpath:mybatis-config.xml"/>-->
+        <!-- 别名设置-->
+        <property name="typeAliasesPackage" value="com.wuqingyu.mybatisplus.entity"/>
+        <property name="globalConfig" ref="globalConfig"/>
+        <property name="configuration" ref="mybatisConfiguration" />
+    </bean>
+
+    <!--MybatisPlus全局配置-->
+    <bean class="com.baomidou.mybatisplus.core.config.GlobalConfig" id="globalConfig">
+        <property name="dbConfig" ref="dbConfig"/>
+    </bean>
+
+    <bean class="com.baomidou.mybatisplus.core.MybatisConfiguration" id="mybatisConfiguration">
+        <property name="mapUnderscoreToCamelCase" value="true"/>
+    </bean>
+
+    <bean class="com.baomidou.mybatisplus.core.config.GlobalConfig$DbConfig" id="dbConfig">
+        <!-- 表名、字段名、是否使用下划线命名（默认 true: 数据库下划线命名）-->
+        <property name="tableUnderline" value="true" />
+        <!--表前缀-->
+        <property name="tablePrefix" value="tbl_"/>
+        <!--主键类型-->
+       <property name="idType" value="AUTO"/>
+    </bean>
+
+    <!--    配置 mybatis 扫描 mapper 接口的路径-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.wuqingyu.mybatisplus.mapper" />
+    </bean>
+
+
+</beans>
